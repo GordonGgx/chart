@@ -13,6 +13,8 @@ import android.widget.Button;
 
 import com.ggx.chart_lib.Chart;
 
+import java.util.Random;
+
 public class MainActivity extends AppCompatActivity {
 
     Button btn;
@@ -27,7 +29,10 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                chart.setValue(60,60,180);
+                int n1=new Random().nextInt(100);
+                int n2=new Random().nextInt(200);
+                int n3=new Random().nextInt(300);
+                chart.setValue(n1,n2,n3);
             }
         });
     }

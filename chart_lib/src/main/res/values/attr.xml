@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="Chart">
-        <attr name="totleNum" format="float"/>
+        <attr name="totleNum" format="integer"/>
         <attr name="numSize" format="dimension"/>
         <attr name="unitSize" format="dimension"/>
         <attr name="tipSize" format="dimension"/>

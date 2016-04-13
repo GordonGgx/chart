@@ -10,13 +10,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 /**
  * Created by John on 2016/4/11.
+ *
  */
 public class Chart extends View{
 
@@ -29,9 +29,9 @@ public class Chart extends View{
     private float sStartAngle;//第二段弧线的初始角度
     private float tStartAngle;//第三段弧线的初始角度
 
-    private String text="123456";
+    private int text=123456;
     private String tip="累计减重";
-    private String unit="kg";
+    private String unit="斤";
     private int mTextUnitSize=(int) TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_SP, 18, getResources().getDisplayMetrics());
     private int mTextTipSize=(int) TypedValue.applyDimension(
@@ -71,10 +71,13 @@ public class Chart extends View{
         super(context, attrs, defStyleAttr);
         init(context,attrs);
     }
-    private void init(Context context,AttributeSet set){
+    private void init(Context context,AttributeSet attrs){
         //获取自定义属性
-        TypedArray ta=context.obtainStyledAttributes(set,R.styleable.Chart);
-
+        TypedArray ta=context.obtainStyledAttributes(attrs,R.styleable.Chart);
+        mTextSize=ta.getDimensionPixelOffset(R.styleable.Chart_numSize,mTextSize);
+        mTextTipSize=ta.getDimensionPixelOffset(R.styleable.Chart_tipSize,mTextTipSize);
+        mTextUnitSize=ta.getDimensionPixelOffset(R.styleable.Chart_unitSize, mTextUnitSize);
+        text=ta.getInt(R.styleable.Chart_totleNum, 0);
         ta.recycle();
         mCircleStroke=30;
         mPaintFirst =new Paint();
@@ -102,7 +105,7 @@ public class Chart extends View{
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         mTextPaint.setStrokeWidth(2);
-        mTextPaint.getTextBounds(text, 0, text.length(), mTextRect);
+        mTextPaint.getTextBounds(String.valueOf(text), 0, String.valueOf(text).length(), mTextRect);
 
         mTextTipPaint=new Paint();
         mTextTipPaint.setAntiAlias(true);
@@ -116,9 +119,9 @@ public class Chart extends View{
         mTextUnitPaint.setColor(Color.parseColor("#333333"));
         mTextUnitPaint.setTextSize(mTextUnitSize);
         mTextUnitPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        /*set=new AnimatorSet();
+        set=new AnimatorSet();
         set.setDuration(1000);
-        set.setInterpolator(new LinearInterpolator());*/
+        set.setInterpolator(new LinearInterpolator());
     }
 
     @Override
@@ -147,8 +150,6 @@ public class Chart extends View{
                     cy-mRadius+mCircleStroke,
                     cx+mRadius-mCircleStroke,
                     cy+mRadius-mCircleStroke);
-
-            Log.i(TAG,"宽高="+mWidth+":"+mHeight+"半径="+mRadius);
         }
     }
 
@@ -162,6 +163,7 @@ public class Chart extends View{
         float angle3=anglePer*value[2];
         sStartAngle=angle1+fStartAngle;
         tStartAngle=angle2+sStartAngle;
+        int totleText=(int)(value[0] + value[1] + value[2]);
         ValueAnimator valueAnimator1=ValueAnimator.ofFloat(0, angle1);
         valueAnimator1.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -184,10 +186,19 @@ public class Chart extends View{
             public void onAnimationUpdate(ValueAnimator animation) {
                 float value = (float) animation.getAnimatedValue();
                 mThird = value;
+
+            }
+        });
+        ValueAnimator valueAnimator4=ValueAnimator.ofInt(0,totleText);
+        valueAnimator4.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int value= (int) animation.getAnimatedValue();
+                text=value;
                 postInvalidate();
             }
         });
-        set.playTogether(valueAnimator1, valueAnimator2,valueAnimator3);
+        set.playTogether(valueAnimator1, valueAnimator2,valueAnimator3,valueAnimator4);
         set.start();
     }
 
@@ -197,11 +208,11 @@ public class Chart extends View{
         canvas.drawArc(mChartRect,fStartAngle, mFirst, false, mPaintFirst);
         canvas.drawArc(mChartRect, sStartAngle, mSecond, false, mPaintSecond);
         canvas.drawArc(mChartRect, tStartAngle, mThird, false, mPaintThird);
-        canvas.drawText(text, (getRight() - getLeft()) / 2,
+        canvas.drawText(String.valueOf(text), (getRight() - getLeft()) / 2,
                 (getBottom() - getTop()) / 2, mTextPaint);
-        canvas.drawText("累计减重", (getRight() - getLeft()) / 2,
+        canvas.drawText(tip, (getRight() - getLeft()) / 2,
                 (getBottom() - getTop()) / 2 + (mTextRect.bottom - mTextRect.top) * 1.2f, mTextTipPaint);
-        canvas.drawText("kg",(getRight() - getLeft()) / 2+mTextPaint.measureText(text)/2,
+        canvas.drawText(unit,(getRight() - getLeft()) / 2+mTextPaint.measureText(String.valueOf(text))/2,
                 (getBottom() - getTop()) / 2,mTextUnitPaint);
     }
 }
